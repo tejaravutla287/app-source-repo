@@ -90,8 +90,8 @@ pipeline {
                     
                         rm -rf target-manifests
                     
-                        git clone https://${GIT_TOKEN}@github.com/tejaravutla287/gitops-repo.git target-manifests
-                    
+                        git clone https://${GIT_TOKEN}@github.com/tejaravutla287/app-manifests-repo.git target-manifests
+                        
                         cd target-manifests
                     
                         sed -i "s|image: .*|image: bhanutejaravutla/simple-app:${BUILD_NUMBER}|" deployment.yaml

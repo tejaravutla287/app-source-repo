@@ -12,11 +12,10 @@ pipeline {
             steps { sh 'mvn clean package -DskipTests' }
         }
         
-        stage('SonarCloud Scan Validation') {
+                stage('SonarCloud Scan Validation') {
             steps {
                 withSonarQubeEnv('SonarCloud') { 
                     withCredentials([string(credentialsId: 'sonarcloud-token', variable: 'SONAR_TOKEN')]) {
-                        // FIX: Wrapped inside a script block to allow variable injection
                         script {
                             env.MAVEN_OPTS = "-Xms256m -Xmx512m -XX:MaxMetaspaceSize=128m"
                         }
@@ -27,12 +26,15 @@ pipeline {
                             -Dsonar.organization=${SONAR_ORG} \
                             -Dsonar.projectKey=${SONAR_PROJ} \
                             -Dsonar.workers=1 \
-                            -Dsonar.scanAllFiles=false
+                            -Dsonar.scanAllFiles=false \
+                            -Dsonar.language=java \
+                            -Dsonar.java.binaries=target/classes
                         """
                     }
                 }
             }
         }
+
         
         stage('Verify Quality Gate') {
             steps {

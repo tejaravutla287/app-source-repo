@@ -22,13 +22,10 @@
     </properties>
 
     <dependencies>
-        <!-- Web dependency to run the server -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-        
-        <!-- Test framework required by the Jenkins test stage -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>

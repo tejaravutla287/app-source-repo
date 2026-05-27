@@ -12,20 +12,25 @@ pipeline {
         }
     stage('SonarCloud Scan Validation') {
             steps {
-                // The wrapper registers the build task context with Jenkins
                 withSonarQubeEnv('SonarCloud') { 
                     withCredentials([string(credentialsId: 'sonarcloud-token', variable: 'SONAR_TOKEN')]) {
+                        // MAVEN_OPTS forces Java to cap its memory and prevent an EC2 crash
+                        env.MAVEN_OPTS = "-Xms256m -Xmx512m -XX:MaxMetaspaceSize=128m"
+                        
                         sh """
                             mvn sonar:sonar \
                             -Dsonar.host.url=https://sonarcloud.io \
                             -Dsonar.token=${SONAR_TOKEN} \
                             -Dsonar.organization=${SONAR_ORG} \
-                            -Dsonar.projectKey=${SONAR_PROJ}
+                            -Dsonar.projectKey=${SONAR_PROJ} \
+                            -Dsonar.workers=1 \
+                            -Dsonar.scanAllFiles=false
                         """
                     }
                 }
             }
         }
+
         
         stage('Verify Quality Gate') {
             steps {

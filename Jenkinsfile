@@ -59,16 +59,21 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(
                     credentialsId: 'docker-hub-creds',
-                    passwordVariable: 'DOCKER_PASSWORD',
-                    usernameVariable: 'DOCKER_USERNAME'
+                    usernameVariable: 'DOCKER_USERNAME',
+                    passwordVariable: 'DOCKER_PASSWORD'
                 )]) {
+        
                     sh """
-                        echo "\$DOCKER_PASSWORD" | docker login -u "\$DOCKER_USERNAME" --password-stdin
+                    echo "Docker Image: ${DOCKER_IMAGE}"
+                    echo "Build Number: ${BUILD_NUMBER}"
         
-                        docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} .
-                        docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}
+                    echo "\$DOCKER_PASSWORD" | docker login -u "\$DOCKER_USERNAME" --password-stdin
         
-                        docker rmi ${DOCKER_IMAGE}:${BUILD_NUMBER} || true
+                    docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} .
+        
+                    docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}
+        
+                    docker rmi ${DOCKER_IMAGE}:${BUILD_NUMBER} || true
                     """
                 }
             }

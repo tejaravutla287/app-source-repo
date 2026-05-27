@@ -10,23 +10,37 @@ pipeline {
         stage('Maven Compile & Build') {
             steps { sh 'mvn clean package -DskipTests' }
         }
-        stage('SonarCloud Scan Validation') {
+    stage('SonarCloud Scan Validation') {
             steps {
-                withCredentials([string(credentialsId: 'sonarcloud-token', variable: 'SONAR_TOKEN')]) {
-                    sh "mvn sonar:sonar -Dsonar.host.url=https://sonarcloud.io -Dsonar.token=${SONAR_TOKEN} -Dsonar.organization=${SONAR_ORG} -Dsonar.projectKey=${SONAR_PROJ}"
-                }
-            }
-        }
-        stage('Verify Quality Gate') {
-            steps {
-                timeout(time: 5, unit: 'MINUTES') {
-                    script {
-                        def qg = waitForQualityGate()
-                        if (qg.status != 'OK') { error "Pipeline stopped: Quality Gate failed: ${qg.status}" }
+                // The wrapper registers the build task context with Jenkins
+                withSonarQubeEnv('SonarCloud') { 
+                    withCredentials([string(credentialsId: 'sonarcloud-token', variable: 'SONAR_TOKEN')]) {
+                        sh """
+                            mvn sonar:sonar \
+                            -Dsonar.host.url=https://sonarcloud.io \
+                            -Dsonar.token=${SONAR_TOKEN} \
+                            -Dsonar.organization=${SONAR_ORG} \
+                            -Dsonar.projectKey=${SONAR_PROJ}
+                        """
                     }
                 }
             }
         }
+        
+        stage('Verify Quality Gate') {
+            steps {
+                timeout(time: 5, unit: 'MINUTES') {
+                    script {
+                        // Jenkins can now read the analysis context from the previous stage
+                        def qg = waitForQualityGate()
+                        if (qg.status != 'OK') { 
+                            error "Pipeline stopped: Quality Gate failed: ${qg.status}" 
+                        }
+                    }
+                }
+            }
+        }
+
         stage('Execute Unit Tests') {
             steps { sh 'mvn test' }
         }

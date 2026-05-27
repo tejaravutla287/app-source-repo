@@ -57,14 +57,25 @@ pipeline {
         
         stage('Package & Push Container') {
             steps {
-                script {
-                    docker.withRegistry('https://docker.io', 'docker-hub-creds') {
-                        def appImage = docker.build("${DOCKER_IMAGE}:${BUILD_NUMBER}")
-                        appImage.push()
-                    }
+                // Use standard environment variable injection instead of the complex plugin wrapper
+                withCredentials([usernamePassword(credentialsId: 'docker-hub-creds', passwordVariable: 'DOCKER_PASSWORD', usernameVariable: 'DOCKER_USERNAME')]) {
+                    sh """
+                        # 1. Log straight into DockerHub using the terminal CLI
+                        echo "${DOCKER_PASSWORD}" | docker login -u "${DOCKER_USERNAME}" --password-stdin
+                        
+                        # 2. Build the container image using the native Buildx engine
+                        docker build -t ${DOCKER_IMAGE}:${BUILD_NUMBER} .
+                        
+                        # 3. Push the finalized container layers to the registry
+                        docker push ${DOCKER_IMAGE}:${BUILD_NUMBER}
+                        
+                        # 4. Clean up local untagged image cache to preserve EC2 disk space
+                        docker rmi ${DOCKER_IMAGE}:${BUILD_NUMBER} || true
+                    """
                 }
             }
         }
+
         
         stage('Manifest GitOps Delivery Loop') {
             steps {

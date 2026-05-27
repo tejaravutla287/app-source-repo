@@ -83,23 +83,27 @@ pipeline {
             steps {
                 script {
                     withCredentials([string(credentialsId: 'git-pat', variable: 'GIT_TOKEN')]) {
-                        
-                        sh '''
+        
+                        sh """
                         git config --global user.email "jenkins-bot@poc.com"
                         git config --global user.name "Jenkins GitOps Engine"
-                    
+        
                         rm -rf target-manifests
-                    
+        
                         git clone https://${GIT_TOKEN}@github.com/tejaravutla287/app-manifests-repo.git target-manifests
-                        
+        
                         cd target-manifests
-                    
-                        sed -i "s|image: .*|image: bhanutejaravutla/simple-app:${BUILD_NUMBER}|" deployment.yaml
-                    
+        
+                        # ✅ FIX: Set remote with PAT for push
+                        git remote set-url origin https://${GIT_TOKEN}@github.com/tejaravutla287/app-manifests-repo.git
+        
+                        sed -i "s|image: .*|image: ${DOCKER_IMAGE}:${BUILD_NUMBER}|" deployment.yaml
+        
                         git add .
-                        git commit -m "Update image to build ${BUILD_NUMBER}"
-                        git push
-                        '''
+                        git commit -m "Update image to build ${BUILD_NUMBER}" || echo "No changes"
+        
+                        git push origin main
+                        """
                     }
                 }
             }

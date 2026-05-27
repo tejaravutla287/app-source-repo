@@ -3,8 +3,8 @@ pipeline {
     environment {
         DOCKER_IMAGE     = 'YOUR_DOCKERHUB_USERNAME/simple-app'
         MANIFEST_REPO    = '://github.com'
-        SONAR_ORG        = 'YOUR_SONARCLOUD_ORGANIZATION_KEY'
-        SONAR_PROJ       = 'YOUR_SONARCLOUD_PROJECT_KEY'
+        SONAR_ORG        = 'tejaravutla287'
+        SONAR_PROJ       = 'tejaravutla287'
     }
     stages {
         stage('Maven Compile & Build') {

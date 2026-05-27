@@ -3,7 +3,7 @@ pipeline {
     environment {
         DOCKER_IMAGE     = 'bhanutejaravutla/simple-app'
         // FIX: Provide the complete path directly to your target manifests repo
-        MANIFEST_REPO    = '://github.com'
+        MANIFEST_REPO    = 'github.com'
         SONAR_ORG        = 'tejaravutla287'
         SONAR_PROJ       = 'tejaravutla287'
     }

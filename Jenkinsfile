@@ -108,4 +108,31 @@ pipeline {
             }
         }
     }
+    post {
+    success {
+        emailext (
+            subject: "✅ SUCCESS: ${JOB_NAME} #${BUILD_NUMBER}",
+            body: """Build Successful 🚀
+            
+            Job: ${JOB_NAME}
+            Build: ${BUILD_NUMBER}
+            Image: ${DOCKER_IMAGE}:${BUILD_NUMBER}
+            
+            Open: ${BUILD_URL}
+            """,
+                        to: "tejaravutla287@gmail.com"
+                    )
+                }
+            
+                failure {
+                    emailext (
+                        subject: "❌ FAILURE: ${JOB_NAME} #${BUILD_NUMBER}",
+                        body: """Build Failed ❌
+                                Check logs:
+                                ${BUILD_URL}
+                                """,
+                        to: "tejaravutla287@gmail.com"
+                    )
+                }
+            }
 }
